@@ -45,7 +45,7 @@ US-CLINIC is a modern, full-stack clinic management system designed for dental a
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/US-CLINIC.git
+git clone https://github.com/Anshul-18/US-CLINIC.git
 cd US-CLINIC
 ```
 
