@@ -12,10 +12,6 @@ function Signup() {
   const [error, setError] = useState('');
   const [focusedField, setFocusedField] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showVerify, setShowVerify] = useState(false);
-  const [verifyEmail, setVerifyEmail] = useState('');
-  const [verifyCode, setVerifyCode] = useState('');
-  const [verifyError, setVerifyError] = useState('');
   const navigate = useNavigate();
   const handleSignup = async () => {
     if (isLoading) return;
@@ -27,8 +23,7 @@ function Signup() {
       await axios.post('http://localhost:5000/auth/signup', {
         name, email, password, role
       });
-      setShowVerify(true);
-      setVerifyEmail(email);
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.msg || 'Signup failed');
     } finally {
@@ -36,30 +31,17 @@ function Signup() {
     }
   };
 
-  const handleVerify = async () => {
-    setVerifyError('');
-    try {
-      await axios.post('http://localhost:5000/auth/verify-email', {
-        email: verifyEmail,
-        code: verifyCode
-      });
-      navigate('/login');
-    } catch (err) {
-      setVerifyError(err.response?.data?.msg || 'Verification failed');
-    }
-  };
-
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      showVerify ? handleVerify() : handleSignup();
+      handleSignup();
     }
   };
 
   return (
     <div style={authPageStyles.page}>
       <div style={authPageStyles.container}>
-        {!showVerify ? (
-          /* Signup Form */
+        {/* Form Section */}
+        <div style={authPageStyles.formSection}>
           <div style={authPageStyles.formCard}>
             <h2 style={authPageStyles.heading}>Create Account</h2>
             <p style={authPageStyles.subtitle}>
@@ -197,38 +179,7 @@ function Signup() {
               </Link>
             </div>
           </div>
-        ) : (
-          /* Email Verification Form */
-          <div style={authPageStyles.formCard}>
-            <h2 style={authPageStyles.heading}>Verify Your Email</h2>
-            <p style={authPageStyles.subtitle}>
-              Enter the 6-digit code sent to <b>{verifyEmail}</b>
-            </p>
-            {verifyError && (
-              <div style={authPageStyles.errorMessage}>
-                {verifyError}
-              </div>
-            )}
-            <div style={authPageStyles.formGroup}>
-              <label style={authPageStyles.label}>Verification Code</label>
-              <input
-                type="text"
-                value={verifyCode}
-                onChange={e => setVerifyCode(e.target.value)}
-                style={authPageStyles.input}
-                maxLength={6}
-                placeholder="Enter code"
-              />
-            </div>
-            <button
-              onClick={handleVerify}
-              style={authPageStyles.button}
-            >
-              Verify Email
-            </button>
-          </div>
-        )}
-        {/* Image Section */}
+        </div>        {/* Image Section */}
         <div style={authPageStyles.imageSection}>
           <div 
             style={authPageStyles.imageContainer}
