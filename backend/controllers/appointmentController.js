@@ -4,13 +4,13 @@ const User = require('../models/User');
 // Create a new appointment
 const createAppointment = async (req, res) => {
   try {
-    const { patientId, doctorId, time, reason } = req.body;
+    const { patientId, doctorId, time, reason, paymentId } = req.body;
 
     // Validate required fields
-    if (!patientId || !doctorId || !time) {
+    if (!patientId || !doctorId || !time || !paymentId) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Patient ID, Doctor ID, and time are required' 
+        message: 'Patient ID, Doctor ID, time, and payment ID are required' 
       });
     }
 
@@ -62,6 +62,8 @@ const createAppointment = async (req, res) => {
       time: appointmentTime,
       reason: reason || '',
       status: 'pending',
+      paymentId: paymentId,
+      fee: Number(process.env.APPOINTMENT_FEE || 100), // Default to 100 if not set
       notifications: [{ 
         message: `New appointment request from ${patient.name}`, 
         seen: false,

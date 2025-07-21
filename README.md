@@ -1,26 +1,36 @@
 # US-CLINIC
 
-US-CLINIC is a modern, full-stack clinic management system designed for dental and general healthcare clinics. It provides seamless appointment booking, user authentication with email verification, and role-based dashboards for patients, doctors, and admins.
+US-CLINIC is a modern, full-stack clinic management system designed for single-doctor clinics. It provides seamless appointment booking with integrated payments, user authentication, and role-based dashboards.
 
 ---
 
 ## Features
 
+- **Single Doctor System**
+  - Designed specifically for clinics with one primary doctor
+  - Admin can register only one doctor in the system
+  - All appointments are automatically routed to the primary doctor
+
 - **User Authentication**
-  - Secure signup and login for patients, doctors, and admins
-  - Email verification using Resend OTP (One-Time Password)
-- **Role-Based Dashboards**
-  - **Patient Dashboard:** Book appointments, view history, receive notifications
-  - **Doctor Dashboard:** Manage appointments, update statuses, reschedule, and view patient info
-  - **Admin Dashboard:** Manage doctors, view all registered doctors
+  - Secure signup and login for patients and admin
+  - Role-based access control (Patient/Doctor/Admin)
+
 - **Appointment Management**
-  - Book, confirm, complete, cancel, and reschedule appointments
+  - Online appointment booking with integrated payment
+  - Real-time availability checking
+  - Appointment status tracking (pending/confirmed/cancelled/completed)
   - Real-time notifications for status changes
-- **Responsive UI**
-  - Modern, mobile-friendly React frontend
-- **API & Backend**
-  - RESTful API built with Express.js and MongoDB (Mongoose)
-  - Modular controllers and routes for scalability
+
+- **Payment Integration**
+  - Secure payment processing using Razorpay
+  - Instant payment confirmation
+  - Payment status tracking
+  - Configurable appointment fees
+
+- **Role-Based Dashboards**
+  - **Patient Dashboard:** Book appointments, make payments, view history
+  - **Doctor Dashboard:** Manage appointments, update statuses
+  - **Admin Dashboard:** Manage doctor profile and system settings
 
 ---
 
@@ -28,7 +38,8 @@ US-CLINIC is a modern, full-stack clinic management system designed for dental a
 
 - **Frontend:** React, React Router
 - **Backend:** Node.js, Express.js, MongoDB (Mongoose)
-- **Email Service:** [Resend](https://resend.com/) for OTP verification
+- **Payment Gateway:** Razorpay
+- **Email Service:** Resend for notifications
 - **Other:** dotenv, cors
 
 ---
@@ -38,9 +49,9 @@ US-CLINIC is a modern, full-stack clinic management system designed for dental a
 ### Prerequisites
 
 - Node.js (v16+ recommended)
-- npm or yarn
 - MongoDB (local or cloud)
-- [Resend](https://resend.com/) account and API key
+- Razorpay account and API keys
+- Resend account for email notifications
 
 ### 1. Clone the Repository
 
@@ -60,8 +71,11 @@ npm install
 
 Create a `.env` file in the `backend` directory:
 
-```
+```env
 RESEND_API_KEY=your_resend_api_key_here
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_secret_key
+APPOINTMENT_FEE=100
 ```
 
 #### Start MongoDB
@@ -86,13 +100,25 @@ npm start
 
 The frontend will run on [http://localhost:3000](http://localhost:3000).
 
+
 ---
 
-## Email Verification with Resend
+## Payment Integration
 
-- On signup, users receive a 6-digit OTP via email (using Resend).
-- Users must verify their email before logging in.
-- The OTP expires after 10 minutes for security.
+### Razorpay Setup
+
+1. Create a Razorpay account at [razorpay.com](https://razorpay.com)
+2. Get your API keys from the dashboard
+3. Add them to your `.env` file
+
+### Payment Flow
+
+1. Patient selects appointment time
+2. Razorpay payment popup appears
+3. Upon successful payment:
+   - Payment is verified
+   - Appointment is created
+   - Confirmation notifications are sent
 
 ---
 
@@ -154,6 +180,14 @@ US-CLINIC/
 
 ---
 
+## System Limitations
+
+- **Single Doctor:** The system is designed for clinics with one doctor only
+- **Payment Required:** All appointments require upfront payment
+- **Fixed Fees:** Appointment fees are set globally in environment variables
+
+---
+
 ## License
 
 This project is for educational/demo purposes. For production use, please review and enhance security, validation, and error handling.
@@ -162,10 +196,10 @@ This project is for educational/demo purposes. For production use, please review
 
 ## Acknowledgements
 
-- [Resend](https://resend.com/) for email delivery
 - [Create React App](https://create-react-app.dev/)
 - [MongoDB](https://www.mongodb.com/)
 - [Express.js](https://expressjs.com/)
+- [Razorpay] (https://razorpay.com/)
 
 ---
 

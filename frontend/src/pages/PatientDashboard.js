@@ -53,35 +53,93 @@ const PatientDashboard = () => {
       [name]: value
     }));
   };
+  const loadScript = (src) => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleSubmitAppointment = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post('http://localhost:5000/appointments/create', {
-        patientId: user._id,
-        doctorId: formData.doctorId,
-        time: formData.time,
-        reason: formData.reason
-      });
-      
-      // Reset form and close modal
-      setFormData({ doctorId: '', time: '', reason: '' });
-      setShowModal(false);
-      
-      // Refresh appointments
-      fetchAppointments();
-      
-      // Show success message
-      if (response.data.success) {
-        alert('Appointment request submitted successfully!');
-      } else {
-        alert('Appointment created successfully!');
+      // Load Razorpay SDK
+      const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+      if (!res) {
+        alert('Failed to load Razorpay SDK. Please check your internet connection.');
+        return;
       }
+
+      // Create payment order
+      const orderResponse = await axios.post('http://localhost:5000/api/payment/create-order');
+      const { order } = orderResponse.data;
+
+      if (!order) {
+        throw new Error('No order received from server');
+      }
+
+      const options = {
+        key: 'rzp_test_rmDkuhxFcgXMgb', // Use the test key directly
+        amount: order.amount,
+        currency: order.currency,
+        name: "US-CLINIC",
+        description: "Appointment Booking Payment",
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            const verifyResponse = await axios.post('http://localhost:5000/api/payment/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+            
+            if (verifyResponse.data.success) {
+              // Create appointment with payment details
+              const appointmentResponse = await axios.post('http://localhost:5000/appointments/create', {
+                patientId: user._id,
+                doctorId: formData.doctorId,
+                time: formData.time,
+                reason: formData.reason,
+                paymentId: response.razorpay_payment_id, // Add payment ID
+              });
+              
+              if (appointmentResponse.data.success) {
+                setFormData({ doctorId: '', time: '', reason: '' });
+                setShowModal(false);
+                fetchAppointments();
+                alert('Appointment booked successfully!');
+              } else {
+                throw new Error(appointmentResponse.data.message);
+              }
+            } else {
+              throw new Error('Payment verification failed');
+            }
+          } catch (error) {
+            console.error('Error in appointment process:', error);
+            alert(error.response?.data?.message || 'Error creating appointment. Please contact support.');
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#3B82F6"
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
     } catch (error) {
-      console.error('Error creating appointment:', error);
-      const errorMessage = error.response?.data?.message || 'Error submitting appointment request. Please try again.';
-      alert(errorMessage);
+      console.error('Error in appointment booking:', error);
+      alert(error.response?.data?.message || 'Error booking appointment');
     } finally {
       setIsSubmitting(false);
     }
