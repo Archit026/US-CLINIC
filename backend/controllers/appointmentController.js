@@ -4,13 +4,12 @@ const User = require('../models/User');
 // Create a new appointment
 const createAppointment = async (req, res) => {
   try {
-    const { patientId, doctorId, time, reason, paymentId } = req.body;
+    const { patientId, doctorId, time, reason, paymentId, fee } = req.body;
 
-    // Validate required fields
-    if (!patientId || !doctorId || !time || !paymentId) {
+    if (!patientId || !doctorId || !time || !paymentId || !fee) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Patient ID, Doctor ID, time, and payment ID are required' 
+        message: 'Missing required fields for appointment creation' 
       });
     }
 
@@ -32,7 +31,6 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    // Check if the appointment time is in the future
     const appointmentTime = new Date(time);
     if (appointmentTime <= new Date()) {
       return res.status(400).json({ 
@@ -63,7 +61,7 @@ const createAppointment = async (req, res) => {
       reason: reason || '',
       status: 'pending',
       paymentId: paymentId,
-      fee: Number(process.env.APPOINTMENT_FEE || 100), // Default to 100 if not set
+      fee: Number(fee),
       notifications: [{ 
         message: `New appointment request from ${patient.name}`, 
         seen: false,
@@ -73,7 +71,6 @@ const createAppointment = async (req, res) => {
 
     await appointment.save();
 
-    // Populate the appointment with patient and doctor details
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate('patient', 'name email phone')
       .populate('doctor', 'name email specialization');
@@ -88,7 +85,7 @@ const createAppointment = async (req, res) => {
     console.error('Error creating appointment:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'Failed to create appointment',
       error: error.message
     });
   }

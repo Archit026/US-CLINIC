@@ -68,23 +68,21 @@ const PatientDashboard = () => {
     setIsSubmitting(true);
     
     try {
-      // Load Razorpay SDK
       const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
       if (!res) {
         alert('Failed to load Razorpay SDK. Please check your internet connection.');
         return;
       }
 
-      // Create payment order
       const orderResponse = await axios.post('http://localhost:5000/api/payment/create-order');
-      const { order } = orderResponse.data;
+      const { order, fee } = orderResponse.data;
 
       if (!order) {
         throw new Error('No order received from server');
       }
 
       const options = {
-        key: 'rzp_test_rmDkuhxFcgXMgb', // Use the test key directly
+        key: 'rzp_test_rmDkuhxFcgXMgb',
         amount: order.amount,
         currency: order.currency,
         name: "US-CLINIC",
@@ -92,37 +90,38 @@ const PatientDashboard = () => {
         order_id: order.id,
         handler: async function (response) {
           try {
-            // Verify payment
+            // Verify payment first
             const verifyResponse = await axios.post('http://localhost:5000/api/payment/verify', {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature
             });
             
-            if (verifyResponse.data.success) {
-              // Create appointment with payment details
-              const appointmentResponse = await axios.post('http://localhost:5000/appointments/create', {
-                patientId: user._id,
-                doctorId: formData.doctorId,
-                time: formData.time,
-                reason: formData.reason,
-                paymentId: response.razorpay_payment_id, // Add payment ID
-              });
-              
-              if (appointmentResponse.data.success) {
-                setFormData({ doctorId: '', time: '', reason: '' });
-                setShowModal(false);
-                fetchAppointments();
-                alert('Appointment booked successfully!');
-              } else {
-                throw new Error(appointmentResponse.data.message);
-              }
-            } else {
+            if (!verifyResponse.data.success) {
               throw new Error('Payment verification failed');
+            }
+
+            // Create appointment with payment details
+            const appointmentResponse = await axios.post('http://localhost:5000/appointments/create', {
+              patientId: user._id,
+              doctorId: formData.doctorId,
+              time: formData.time,
+              reason: formData.reason,
+              paymentId: response.razorpay_payment_id,
+              fee: fee // Include the fee from the order response
+            });
+
+            if (appointmentResponse.data.success) {
+              setFormData({ doctorId: '', time: '', reason: '' });
+              setShowModal(false);
+              fetchAppointments();
+              alert('Appointment booked successfully!');
+            } else {
+              throw new Error(appointmentResponse.data.message);
             }
           } catch (error) {
             console.error('Error in appointment process:', error);
-            alert(error.response?.data?.message || 'Error creating appointment. Please contact support.');
+            throw error; // Re-throw to be caught by outer catch block
           }
         },
         prefill: {
@@ -139,7 +138,7 @@ const PatientDashboard = () => {
 
     } catch (error) {
       console.error('Error in appointment booking:', error);
-      alert(error.response?.data?.message || 'Error booking appointment');
+      alert(error.response?.data?.message || 'Error creating appointment. Please contact support.');
     } finally {
       setIsSubmitting(false);
     }

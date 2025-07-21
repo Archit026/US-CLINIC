@@ -6,15 +6,15 @@ const razorpay = new Razorpay({
   key_secret: 'DDV6XaFdhwFTbqbWb1gCOP5B'
 });
 
-// Verify credentials are loaded
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
   throw new Error('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be provided in environment variables');
 }
 
 const createPaymentOrder = async (req, res) => {
   try {
+    const amount = Number(process.env.APPOINTMENT_FEE || 100);
     const options = {
-      amount: 100 * 100, // amount in smallest currency unit (paise)
+      amount: amount * 100, // amount in smallest currency unit (paise)
       currency: "INR",
       receipt: `receipt_${Date.now()}`
     };
@@ -31,6 +31,7 @@ const createPaymentOrder = async (req, res) => {
     res.status(200).json({
       success: true,
       order,
+      fee: amount 
     });
   } catch (error) {
     console.error('Error creating payment order:', error);
