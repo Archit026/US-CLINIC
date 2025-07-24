@@ -29,7 +29,14 @@ const AdminDashboard = () => {
       alert('Please fill all fields');
       return;
     }
+
     try {
+      // Check if doctor already exists
+      if (doctors.length > 0) {
+        alert('Only one doctor is allowed in the system');
+        return;
+      }
+
       await axios.post('http://localhost:5000/auth/signup', {
         name,
         email,
@@ -42,7 +49,11 @@ const AdminDashboard = () => {
       setPassword('');
     } catch (error) {
       console.error('Error adding doctor:', error);
-      alert('Failed to add doctor. Maybe email already exists.');
+      if (error.response?.data?.message === 'Doctor already exists') {
+        alert('Only one doctor is allowed in the system');
+      } else {
+        alert('Failed to add doctor. Maybe email already exists.');
+      }
     }
   };
 
@@ -102,29 +113,37 @@ const AdminDashboard = () => {
 
       <h2 style={{ color: '#333' }}>Welcome Admin {user.name}</h2>
 
-      <h3 style={{ color: '#444', marginTop: '30px' }}>Add Doctor</h3>
-      <input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={inputStyle}
-      /><br />
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={inputStyle}
-      /><br />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={inputStyle}
-      /><br />
-      <button onClick={addDoctor} style={buttonStyle}>Add Doctor</button>
+      {doctors.length === 0 ? (
+        <>
+          <h3 style={{ color: '#444', marginTop: '30px' }}>Add Doctor</h3>
+          <input
+            type="text"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
+          /><br />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={inputStyle}
+          /><br />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={inputStyle}
+          /><br />
+          <button onClick={addDoctor} style={buttonStyle}>Add Doctor</button>
+        </>
+      ) : (
+        <p style={{ color: '#666', marginTop: '20px' }}>
+          Maximum number of doctors (1) already registered
+        </p>
+      )}
 
       <h3 style={{ color: '#444', marginTop: '30px' }}>Registered Doctors</h3>
       <ul style={{ padding: 0, listStyle: 'none' }}>
