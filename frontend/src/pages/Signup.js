@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { getUser } from '../utils/auth';
 import authPageStyles from '../styles/authPageStyles';
 import { API_URL } from '../config/api';
 
@@ -14,6 +15,16 @@ function Signup() {
   const [focusedField, setFocusedField] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const user = getUser();
+    if (user) {
+      if (user.role === 'admin') navigate('/admin');
+      else if (user.role === 'doctor') navigate('/doctor');
+      else navigate('/patient');
+    }
+  }, [navigate]);
+
   const handleSignup = async () => {
     if (isLoading) return;
     

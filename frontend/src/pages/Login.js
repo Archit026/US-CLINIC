@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { setUser } from '../utils/auth';
+import { setUser, getUser } from '../utils/auth';
+import { toast } from 'react-toastify';
 import authPageStyles from '../styles/authPageStyles';
 import { API_URL } from '../config/api';
 
@@ -15,6 +16,16 @@ function Login() {
   const [focusedField, setFocusedField] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const user = getUser();
+    if (user) {
+      if (user.role === 'admin') navigate('/admin');
+      else if (user.role === 'doctor') navigate('/doctor');
+      else navigate('/patient');
+    }
+  }, [navigate]);
+
   const handleLogin = async () => {
     if (isLoading) return;
     
@@ -27,10 +38,18 @@ function Login() {
         email, password, role
       });
       setUser(res.data.user);
-
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'doctor') navigate('/doctor');
-      else navigate('/patient');
+      
+      // Show success toast and reload page after 2 seconds
+      toast.success('Login Successful! 🎉', {
+        position: 'top-center',
+        autoClose: 2000,
+        hideProgressBar: false,
+      });
+      
+      // Reload page after showing the notification
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed');
     } finally {

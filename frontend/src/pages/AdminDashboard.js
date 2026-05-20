@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getUser, logoutUser } from '../utils/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { API_URL } from '../config/api';
+import DashboardLayout from '../components/DashboardLayout';
 
 const AdminDashboard = () => {
   const [doctors, setDoctors] = useState([]);
@@ -13,8 +16,7 @@ const AdminDashboard = () => {
 
   const fetchDoctors = async () => {
     try {
-      // const res = await axios.get('http://localhost:5000/auth/doctors');
-      const res = await axios.get('https://us-clinic-1.onrender.com/');
+      const res = await axios.get(`${API_URL}/auth/doctors`);
       setDoctors(res.data);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -27,18 +29,18 @@ const AdminDashboard = () => {
 
   const addDoctor = async () => {
     if (!name || !email || !password) {
-      alert('Please fill all fields');
+      toast.error('Please fill all fields');
       return;
     }
 
     try {
       // Check if doctor already exists
       if (doctors.length > 0) {
-        alert('Only one doctor is allowed in the system');
+        toast.error('Only one doctor is allowed in the system');
         return;
       }
 
-      await axios.post('http://localhost:5000/auth/signup', {
+      await axios.post(`${API_URL}/auth/signup`, {
         name,
         email,
         password,
@@ -51,46 +53,70 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error adding doctor:', error);
       if (error.response?.data?.message === 'Doctor already exists') {
-        alert('Only one doctor is allowed in the system');
+        toast.error('Only one doctor is allowed in the system');
       } else {
-        alert('Failed to add doctor. Maybe email already exists.');
+        toast.error('Failed to add doctor. Maybe email already exists.');
       }
     }
   };
 
   const handleLogout = () => {
     logoutUser();
-    navigate('/login');
+    
+    // Show logout success toast
+    toast.success('Logout Successful! 👋', {
+      position: 'top-center',
+      autoClose: 2000,
+      hideProgressBar: false,
+    });
+    
+    // Navigate to main page after showing the notification
+    setTimeout(() => {
+      navigate('/');
+    }, 2000);
   };
 
   const containerStyle = {
-    maxWidth: '600px',
-    margin: '20px auto',
-    padding: '30px',
-    backgroundColor: '#fff',
-    borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    fontFamily: 'Arial, sans-serif'
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '24px',
+    background: '#FFFFFF',
+    border: '1px solid #E2E8F0',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    color: '#0B1D3A',
+    fontFamily: "'Inter', sans-serif"
+  };
+
+  const pageStyle = {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%)',
+    color: '#FFFFFF',
   };
 
   const inputStyle = {
     width: '100%',
-    padding: '10px',
+    padding: '12px 16px',
     margin: '8px 0',
-    borderRadius: '8px',
-    border: '1px solid #ccc',
-    fontSize: '16px'
+    borderRadius: '10px',
+    border: '2px solid #E2E8F0',
+    background: '#FFFFFF',
+    color: '#0B1D3A',
+    fontSize: '16px',
+    outline: 'none',
   };
 
   const buttonStyle = {
-    backgroundColor: '#4a90e2',
+    background: 'linear-gradient(135deg, #2A7DE1 0%, #1A5CB8 100%)',
     color: '#fff',
-    padding: '10px 16px',
+    padding: '12px 24px',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '10px',
     cursor: 'pointer',
     fontSize: '16px',
-    marginTop: '10px'
+    fontWeight: '600',
+    marginTop: '10px',
+    boxShadow: '0 4px 14px rgba(42, 125, 225, 0.3)',
   };
 
   const logoutButtonStyle = {
@@ -100,65 +126,70 @@ const AdminDashboard = () => {
   };
 
   const listItemStyle = {
-    background: '#f0f4f8',
-    padding: '10px',
-    margin: '6px 0',
-    borderRadius: '6px'
+    background: '#F3F8FE',
+    border: '2px solid #DBEAFE',
+    padding: '12px 16px',
+    margin: '8px 0',
+    borderRadius: '10px',
+    color: '#0B1D3A',
   };
 
   return (
-    <div style={containerStyle}>
-      <button onClick={handleLogout} style={logoutButtonStyle}>
-        Logout
-      </button>
+    <DashboardLayout>
+      <div style={{ marginBottom: '30px' }}>
+        <h2 style={{ color: '#0B1D3A', fontSize: '28px', fontWeight: '800', margin: '0 0 8px 0' }}>
+          Admin Dashboard
+        </h2>
+        <p style={{ color: '#64748B', margin: 0 }}>Manage doctors and system configuration.</p>
+      </div>
 
-      <h2 style={{ color: '#333' }}>Welcome Admin {user.name}</h2>
-
-      {doctors.length === 0 ? (
-        <>
-          <h3 style={{ color: '#444', marginTop: '30px' }}>Add Doctor</h3>
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
-          /><br />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={inputStyle}
-          /><br />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
-          /><br />
-          <button onClick={addDoctor} style={buttonStyle}>Add Doctor</button>
-        </>
-      ) : (
-        <p style={{ color: '#666', marginTop: '20px' }}>
-          Maximum number of doctors (1) already registered
-        </p>
-      )}
-
-      <h3 style={{ color: '#444', marginTop: '30px' }}>Registered Doctors</h3>
-      <ul style={{ padding: 0, listStyle: 'none' }}>
+      <div style={containerStyle}>
         {doctors.length === 0 ? (
-          <p>No doctors found.</p>
+          <>
+            <h3 style={{ color: '#0B1D3A', marginTop: '30px', fontWeight: '700' }}>Add Doctor</h3>
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={inputStyle}
+            /><br />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={inputStyle}
+            /><br />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={inputStyle}
+            /><br />
+            <button onClick={addDoctor} style={buttonStyle}>Add Doctor</button>
+          </>
         ) : (
-          doctors.map((doc) => (
-            <li key={doc._id} style={listItemStyle}>
-              {doc.name} - {doc.email}
-            </li>
-          ))
+          <p style={{ color: '#64748B', marginTop: '20px' }}>
+            Maximum number of doctors (1) already registered
+          </p>
         )}
-      </ul>
-    </div>
+
+        <h3 style={{ color: '#0B1D3A', marginTop: '30px', fontWeight: '700' }}>Registered Doctors</h3>
+        <ul style={{ padding: 0, listStyle: 'none' }}>
+          {doctors.length === 0 ? (
+            <p>No doctors found.</p>
+          ) : (
+            doctors.map((doc) => (
+              <li key={doc._id} style={listItemStyle}>
+                {doc.name} - {doc.email}
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
+    </DashboardLayout>
   );
 };
 

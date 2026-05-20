@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, authorizeRole } = require('../middleware/auth');
+const { validateCreateAppointment, validateAppointmentId, handleValidationErrors } = require('../middleware/validation');
 const {
   createAppointment,
   getAllAppointments,
@@ -12,43 +14,60 @@ const {
   getFilteredAppointments
 } = require('../controllers/appointmentController');
 
-// Create a new appointment
-router.post('/create', createAppointment);
+/**
+ * SECURITY FIX #3, #4: All appointment routes now require authentication
+ */
 
-// Get all appointments
-router.get('/all', getAllAppointments);
+// Create a new appointment (authenticated users only)
+router.post('/create', 
+  authMiddleware, 
+  validateCreateAppointment, 
+  handleValidationErrors,
+  createAppointment
+);
 
-// Get appointments with filters (query parameters)
-router.get('/filter', getFilteredAppointments);
+// Get all appointments (doctors and patients can only see their own)
+router.get('/all', authMiddleware, getAllAppointments);
 
-// Get appointments by patient ID
-router.get('/patient/:patientId', getAppointmentsByPatient);
+// Get appointments with filters
+router.get('/filter', authMiddleware, getFilteredAppointments);
 
-// Get appointments by doctor ID
-router.get('/doctor/:doctorId', getAppointmentsByDoctor);
+// Get appointments by patient ID (patients can only see their own)
+router.get('/patient/:patientId', authMiddleware, getAppointmentsByPatient);
 
-// Get appointment by ID
-router.get('/:appointmentId', getAppointmentById);
+// Get appointments by doctor ID (doctors can only see their own)
+router.get('/doctor/:doctorId', authMiddleware, getAppointmentsByDoctor);
 
-// Update appointment status
-router.patch('/status/:appointmentId', updateAppointmentStatus);
+// Get appointment by ID (authorized users only)
+router.get('/:appointmentId', 
+  authMiddleware, 
+  validateAppointmentId,
+  handleValidationErrors,
+  getAppointmentById
+);
 
-// Delete appointment
-router.delete('/:appointmentId', deleteAppointment);
+// Update appointment status (doctors and patients with authorization)
+router.patch('/status/:appointmentId', 
+  authMiddleware, 
+  validateAppointmentId,
+  handleValidationErrors,
+  updateAppointmentStatus
+);
+
+// Delete appointment (authorized users only)
+router.delete('/:appointmentId', 
+  authMiddleware, 
+  validateAppointmentId,
+  handleValidationErrors,
+  deleteAppointment
+);
 
 // Mark notification as seen
-router.patch('/:appointmentId/notification/:notificationIndex/seen', markNotificationSeen);
-
-// Legacy route for backward compatibility
-router.post('/update-status', async (req, res) => {
-  try {
-    const { appointmentId, status } = req.body;
-    req.params.appointmentId = appointmentId;
-    req.body = { status };
-    updateAppointmentStatus(req, res);
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
+router.patch('/:appointmentId/notification/:notificationIndex/seen', 
+  authMiddleware, 
+  validateAppointmentId,
+  handleValidationErrors,
+  markNotificationSeen
+);
 
 module.exports = router;

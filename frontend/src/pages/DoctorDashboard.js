@@ -1,10 +1,39 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { getUser, logoutUser } from '../utils/auth';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import doctorDashboardStyles from '../styles/doctorDashboardStyles';
 import { API_URL } from '../config/api';
+import DashboardLayout from '../components/DashboardLayout';
+import { isActiveAppointment, filterAppointmentsForUser } from '../utils/appointmentUtils';
 
+// Constants
+const EMPTY_STATE_ICON = '📋';
+const TOAST_DURATION = 2000;
+const LOGOUT_REDIRECT_DELAY = 2000;
+const HEADER_FONT_SIZE = '28px';
+const HEADER_FONT_WEIGHT = '800';
+const HEADER_COLOR = '#0B1D3A';
+const SUBTITLE_COLOR = '#64748B';
+
+/**
+ * Utility function to handle card hover effects
+ */
+const handleCardHoverOver = (e) => {
+  e.currentTarget.style.boxShadow = '0 4px 12px rgba(15, 23, 42, 0.08)';
+  e.currentTarget.style.borderColor = '#CBD5E1';
+};
+
+const handleCardHoverOut = (e) => {
+  e.currentTarget.style.boxShadow = '0 1px 3px rgba(15, 23, 42, 0.06)';
+  e.currentTarget.style.borderColor = '#E2E8F0';
+};
+
+/**
+ * DoctorDashboard - Main dashboard component for doctors
+ * Displays active appointments, statistics, and appointment management tools
+ */
 const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
@@ -20,19 +49,28 @@ const DoctorDashboard = () => {
     confirmed: 0,
     completed: 0
   });
+  
   const user = getUser();
+  const userId = user?._id;
   const navigate = useNavigate();
+
+  /**
+   * Fetch all active appointments for the current doctor
+   */
   const fetchAppointments = useCallback(async () => {
-    if (!user) return;
+    const currentUser = getUser();
+    if (!currentUser?._id) return;
+    
     try {
-      const res = await axios.get(`${API_URL}/appointments/all`);
-      const appointmentsData = res.data.appointments || res.data;
-      const doctorAppointments = appointmentsData.filter(
-        appt => appt.doctor._id === user._id
-      );
+      const response = await axios.get(`${API_URL}/appointments/all`);
+      const appointmentsData = response.data.appointments || response.data;
+      
+      const doctorAppointments = filterAppointmentsForUser(appointmentsData, currentUser)
+        .filter(isActiveAppointment);
+      
       setAppointments(doctorAppointments);
       
-      // Calculate stats
+      // Calculate appointment statistics
       const total = doctorAppointments.length;
       const pending = doctorAppointments.filter(appt => appt.status === 'pending').length;
       const confirmed = doctorAppointments.filter(appt => appt.status === 'confirmed').length;
@@ -40,39 +78,65 @@ const DoctorDashboard = () => {
       
       setStats({ total, pending, confirmed, completed });
     } catch (error) {
-      console.error('Failed to fetch appointments:', error);
+      console.error('Failed to fetch appointments:', error.message);
+      toast.error('Unable to load appointments. Please refresh the page.');
     }
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  /**
+   * Handle user logout and redirect
+   */
   const handleLogout = () => {
     logoutUser();
-    navigate('/login');
+    
+    toast.success('Logout successful', {
+      position: 'top-center',
+      autoClose: TOAST_DURATION,
+      hideProgressBar: false,
+    });
+    
+    setTimeout(() => {
+      navigate('/');
+    }, LOGOUT_REDIRECT_DELAY);
   };
 
+  /**
+   * Toggle appointment details expansion
+   */
   const toggleAppointmentDetails = (appointmentId) => {
     setExpandedAppointment(
       expandedAppointment === appointmentId ? null : appointmentId
     );
   };
 
-  const handleUpdateStatus = async (appointmentId, status) => {
+  /**
+   * Update appointment status
+   */
+  const handleUpdateStatus = async (appointmentId, newStatus) => {
     try {
       await axios.patch(`${API_URL}/appointments/status/${appointmentId}`, {
-        status,
+        status: newStatus,
         doctorId: user._id
       });
+      
       fetchAppointments();
-      alert(`Appointment ${status} successfully!`);
+      toast.success(`Appointment marked as ${newStatus}`, {
+        autoClose: TOAST_DURATION
+      });
     } catch (error) {
-      console.error(`Error updating appointment status to ${status}:`, error);
-      const errorMessage = error.response?.data?.message || `Error updating appointment status.`;
-      alert(errorMessage);
+      const errorMessage = error.response?.data?.message || 'Failed to update appointment status';
+      console.error(`Error updating appointment status:`, error.message);
+      toast.error(errorMessage);
     }
   };
 
+  /**
+   * Open reschedule modal
+   */
   const openRescheduleModal = (appointmentId) => {
     setRescheduleData({
       appointmentId,
@@ -81,17 +145,22 @@ const DoctorDashboard = () => {
     setShowRescheduleModal(true);
   };
 
+  /**
+   * Close reschedule modal
+   */
   const closeRescheduleModal = () => {
     setShowRescheduleModal(false);
     setRescheduleData({ appointmentId: '', newTime: '' });
   };
 
+  /**
+   * Submit reschedule form
+   */
   const handleRescheduleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // For now, we'll update the time directly (you might want to create a specific reschedule endpoint)
       await axios.patch(`${API_URL}/appointments/status/${rescheduleData.appointmentId}`, {
         status: 'confirmed',
         doctorId: user._id
@@ -99,15 +168,20 @@ const DoctorDashboard = () => {
       
       closeRescheduleModal();
       fetchAppointments();
-      alert('Appointment rescheduled successfully!');
+      toast.success('Appointment rescheduled successfully', {
+        autoClose: TOAST_DURATION
+      });
     } catch (error) {
-      console.error('Error rescheduling appointment:', error);
-      alert('Error rescheduling appointment. Please try again.');
+      console.error('Error rescheduling appointment:', error.message);
+      toast.error('Failed to reschedule appointment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  /**
+   * Handle input changes in form fields
+   */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRescheduleData(prev => ({
@@ -116,409 +190,366 @@ const DoctorDashboard = () => {
     }));
   };
 
+  /**
+   * Get style based on appointment status
+   */
   const getStatusStyle = (status) => {
-    switch (status.toLowerCase()) {
-      case 'confirmed':
-        return doctorDashboardStyles.statusConfirmed;
-      case 'pending':
-        return doctorDashboardStyles.statusPending;
-      case 'completed':
-        return doctorDashboardStyles.statusCompleted;
-      case 'cancelled':
-        return doctorDashboardStyles.statusCancelled;
-      default:
-        return doctorDashboardStyles.statusPending;
-    }
+    const statusStyles = {
+      'confirmed': doctorDashboardStyles.statusConfirmed,
+      'pending': doctorDashboardStyles.statusPending,
+      'completed': doctorDashboardStyles.statusCompleted,
+      'cancelled': doctorDashboardStyles.statusCancelled
+    };
+    
+    return statusStyles[status.toLowerCase()] || doctorDashboardStyles.statusPending;
   };
   return (
-    <div style={doctorDashboardStyles.container}>
-      <header style={doctorDashboardStyles.header}>
-        <h2 style={doctorDashboardStyles.welcomeText}>
-          Welcome, Dr. {user ? user.name : 'Doctor'}
+    <DashboardLayout>
+      {/* Header Section */}
+      <div style={{ marginBottom: '30px', animation: 'fadeUp 0.5s ease both' }}>
+        <h2 style={{ 
+          color: HEADER_COLOR, 
+          fontSize: HEADER_FONT_SIZE, 
+          fontWeight: HEADER_FONT_WEIGHT, 
+          margin: '0 0 8px 0' 
+        }}>
+          Welcome, Dr. {user?.name || 'Doctor'}
         </h2>
-        <button 
-          onClick={handleLogout} 
-          style={doctorDashboardStyles.logoutButton}
-          onMouseOver={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 20px rgba(238, 90, 82, 0.6)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 15px rgba(238, 90, 82, 0.4)';
-          }}
-        >
-          Logout
-        </button>
-      </header>
+        <p style={{ color: SUBTITLE_COLOR, margin: 0 }}>
+          Review appointment requests, reschedule, or mark appointments as complete.
+        </p>
+      </div>
+
+      {/* Statistics Section */}
+      <div style={doctorDashboardStyles.statsContainer}>
+        <StatCard 
+          value={stats.total} 
+          label="Total Appointments" 
+        />
+        <StatCard 
+          value={stats.pending} 
+          label="Pending Requests" 
+        />
+        <StatCard 
+          value={stats.confirmed} 
+          label="Confirmed" 
+        />
+        <StatCard 
+          value={stats.completed} 
+          label="Completed" 
+        />
+      </div>
+
+      {/* Active Appointments Section */}
+      <h3 style={{ ...doctorDashboardStyles.sectionTitle, color: HEADER_COLOR }}>
+        Active Appointments
+      </h3>
       
-      <main style={doctorDashboardStyles.mainContent}>
-        {/* Statistics Cards */}
-        <div style={doctorDashboardStyles.statsContainer}>
-          <div 
-            style={doctorDashboardStyles.statCard}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div style={doctorDashboardStyles.statNumber}>{stats.total}</div>
-            <div style={doctorDashboardStyles.statLabel}>Total Appointments</div>
-          </div>
-          
-          <div 
-            style={doctorDashboardStyles.statCard}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div style={doctorDashboardStyles.statNumber}>{stats.pending}</div>
-            <div style={doctorDashboardStyles.statLabel}>Pending Requests</div>
-          </div>
-          
-          <div 
-            style={doctorDashboardStyles.statCard}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div style={doctorDashboardStyles.statNumber}>{stats.confirmed}</div>
-            <div style={doctorDashboardStyles.statLabel}>Confirmed</div>
-          </div>
-          
-          <div 
-            style={doctorDashboardStyles.statCard}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div style={doctorDashboardStyles.statNumber}>{stats.completed}</div>
-            <div style={doctorDashboardStyles.statLabel}>Completed</div>
+      {appointments.length === 0 ? (
+        <div style={doctorDashboardStyles.emptyState}>
+          <div style={doctorDashboardStyles.emptyStateIcon}>{EMPTY_STATE_ICON}</div>
+          <div style={doctorDashboardStyles.emptyStateText}>No appointments scheduled</div>
+          <div style={doctorDashboardStyles.emptyStateSubtext}>
+            Your appointment requests will appear here
           </div>
         </div>
-
-        <h3 style={doctorDashboardStyles.sectionTitle}>Your Appointments</h3>        {appointments.length === 0 ? (
-          <div style={doctorDashboardStyles.emptyState}>
-            <div style={doctorDashboardStyles.emptyStateIcon}>🏥</div>
-            <div style={doctorDashboardStyles.emptyStateText}>No appointments scheduled</div>
-            <div style={doctorDashboardStyles.emptyStateSubtext}>
-              Your appointment requests will appear here
-            </div>
-          </div>
-        ) : (
-          <div style={doctorDashboardStyles.appointmentsList}>
-            {appointments.map(appt => (
-              <div 
-                key={appt._id} 
-                style={doctorDashboardStyles.appointmentListItem}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateX(5px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateX(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                }}
-              >
-                {/* Main appointment info - always visible */}
-                <div 
-                  style={doctorDashboardStyles.appointmentHeader}
-                  onClick={() => toggleAppointmentDetails(appt._id)}
-                >
-                  <div style={doctorDashboardStyles.appointmentMainInfo}>
-                    <div style={doctorDashboardStyles.appointmentDateBadge}>
-                      <div style={doctorDashboardStyles.dateDay}>
-                        {new Date(appt.time).getDate()}
-                      </div>
-                      <div style={doctorDashboardStyles.dateMonth}>
-                        {new Date(appt.time).toLocaleDateString('en-US', { month: 'short' })}
-                      </div>
-                    </div>
-                    
-                    <div style={doctorDashboardStyles.appointmentSummary}>
-                      <div style={doctorDashboardStyles.patientName}>
-                        👤 {appt.patient.name}
-                      </div>
-                      <div style={doctorDashboardStyles.appointmentTime}>
-                        {new Date(appt.time).toLocaleTimeString('en-US', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </div>
-                      <div style={doctorDashboardStyles.appointmentYear}>
-                        {new Date(appt.time).getFullYear()}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style={doctorDashboardStyles.appointmentActions}>
-                    <span 
-                      style={{
-                        ...doctorDashboardStyles.statusBadge,
-                        ...getStatusStyle(appt.status)
-                      }}
-                    >
-                      {appt.status}
-                    </span>
-                    
-                    <div style={doctorDashboardStyles.expandButton}>
-                      <span style={{
-                        ...doctorDashboardStyles.expandIcon,
-                        transform: expandedAppointment === appt._id ? 'rotate(180deg)' : 'rotate(0deg)'
-                      }}>
-                        ▼
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expanded details */}
-                {expandedAppointment === appt._id && (
-                  <div style={doctorDashboardStyles.appointmentDetails}>
-                    <div style={doctorDashboardStyles.detailsGrid}>
-                      <div style={doctorDashboardStyles.detailItem}>
-                        <div style={doctorDashboardStyles.detailLabel}>
-                          👤 Patient Information
-                        </div>
-                        <div style={doctorDashboardStyles.detailValue}>
-                          <div style={doctorDashboardStyles.patientInfo}>
-                            <div style={doctorDashboardStyles.patientFullName}>
-                              {appt.patient.name}
-                            </div>
-                            <div style={doctorDashboardStyles.patientEmail}>
-                              📧 {appt.patient.email}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={doctorDashboardStyles.detailItem}>
-                        <div style={doctorDashboardStyles.detailLabel}>
-                          📅 Full Date & Time
-                        </div>
-                        <div style={doctorDashboardStyles.detailValue}>
-                          {new Date(appt.time).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </div>
-
-                      {appt.reason && (
-                        <div style={doctorDashboardStyles.detailItem}>
-                          <div style={doctorDashboardStyles.detailLabel}>
-                            📝 Reason for Visit
-                          </div>
-                          <div style={doctorDashboardStyles.detailValue}>
-                            {appt.reason}
-                          </div>
-                        </div>
-                      )}
-
-                      <div style={doctorDashboardStyles.detailItem}>
-                        <div style={doctorDashboardStyles.detailLabel}>
-                          🏥 Appointment ID
-                        </div>
-                        <div style={doctorDashboardStyles.detailValue}>
-                          <code style={doctorDashboardStyles.appointmentId}>
-                            {appt._id.slice(-8).toUpperCase()}
-                          </code>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div style={doctorDashboardStyles.actionButtonsSection}>
-                      <div style={doctorDashboardStyles.actionButtonsTitle}>
-                        ⚡ Quick Actions
-                      </div>
-                      <div style={doctorDashboardStyles.buttonGroup}>
-                        {appt.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleUpdateStatus(appt._id, 'confirmed')}
-                              style={doctorDashboardStyles.acceptButton}
-                              onMouseOver={(e) => {
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
-                              }}
-                              onMouseOut={(e) => {
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
-                              }}
-                            >
-                              ✓ Accept
-                            </button>
-                            
-                            <button
-                              onClick={() => openRescheduleModal(appt._id)}
-                              style={doctorDashboardStyles.rescheduleButton}
-                              onMouseOver={(e) => {
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.5)';
-                              }}
-                              onMouseOut={(e) => {
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 4px 15px rgba(245, 158, 11, 0.3)';
-                              }}
-                            >
-                              📅 Reschedule
-                            </button>
-                            
-                            <button
-                              onClick={() => handleUpdateStatus(appt._id, 'cancelled')}
-                              style={doctorDashboardStyles.rejectButton}
-                              onMouseOver={(e) => {
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.5)';
-                              }}
-                              onMouseOut={(e) => {
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 4px 15px rgba(239, 68, 68, 0.3)';
-                              }}
-                            >
-                              ✗ Reject
-                            </button>
-                          </>
-                        )}
-                        
-                        {appt.status === 'confirmed' && (
-                          <button
-                            onClick={() => handleUpdateStatus(appt._id, 'completed')}
-                            style={doctorDashboardStyles.completeButton}
-                            onMouseOver={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.5)';
-                            }}
-                            onMouseOut={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)';
-                            }}
-                          >
-                            ✓ Mark Complete
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {appt.notifications && appt.notifications.length > 0 && (
-                      <div style={doctorDashboardStyles.notificationSection}>
-                        <div style={doctorDashboardStyles.notificationTitle}>
-                          🔔 Notifications
-                        </div>
-                        <div style={doctorDashboardStyles.notificationList}>
-                          {appt.notifications.map((n, idx) => (
-                            <div key={idx} style={doctorDashboardStyles.notificationItem}>
-                              <div style={doctorDashboardStyles.notificationContent}>
-                                {n.message}
-                              </div>
-                              <div style={doctorDashboardStyles.notificationMeta}>
-                                {n.seen ? (
-                                  <span style={doctorDashboardStyles.notificationSeen}>✓ Seen</span>
-                                ) : (
-                                  <span style={doctorDashboardStyles.notificationNew}>● New</span>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
+      ) : (
+        <div style={doctorDashboardStyles.appointmentsList}>
+          {appointments.map(appt => (
+            <AppointmentItem
+              key={appt._id}
+              appointment={appt}
+              isExpanded={expandedAppointment === appt._id}
+              onToggleExpand={() => toggleAppointmentDetails(appt._id)}
+              onStatusUpdate={handleUpdateStatus}
+              onReschedule={() => openRescheduleModal(appt._id)}
+              getStatusStyle={getStatusStyle}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Reschedule Modal */}
       {showRescheduleModal && (
-        <div style={doctorDashboardStyles.modalOverlay} onClick={closeRescheduleModal}>
-          <div 
-            style={doctorDashboardStyles.modalContent} 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={doctorDashboardStyles.modalTitle}>Reschedule Appointment</h2>
-            
-            <form onSubmit={handleRescheduleSubmit}>
-              <input
-                type="datetime-local"
-                name="newTime"
-                value={rescheduleData.newTime}
-                onChange={handleInputChange}
-                style={doctorDashboardStyles.formInput}
-                min={new Date().toISOString().slice(0, 16)}
-                required
-              />
+        <RescheduleModal
+          isOpen={showRescheduleModal}
+          onClose={closeRescheduleModal}
+          onSubmit={handleRescheduleSubmit}
+          rescheduleData={rescheduleData}
+          onInputChange={handleInputChange}
+          isSubmitting={isSubmitting}
+        />
+      )}
+    </DashboardLayout>
+  );
+};
 
-              <div style={doctorDashboardStyles.modalButtonGroup}>
-                <button
-                  type="button"
-                  onClick={closeRescheduleModal}
-                  style={doctorDashboardStyles.cancelButton}
-                  onMouseOver={(e) => {
-                    e.target.style.background = 'rgba(107, 114, 128, 0.2)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.background = 'rgba(107, 114, 128, 0.1)';
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  style={{
-                    ...doctorDashboardStyles.submitButton,
-                    opacity: isSubmitting ? 0.7 : 1,
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer'
-                  }}
-                  onMouseOver={(e) => {
-                    if (!isSubmitting) {
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (!isSubmitting) {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                    }
-                  }}
-                >
-                  {isSubmitting ? 'Rescheduling...' : 'Confirm Reschedule'}
-                </button>
-              </div>
-            </form>
+/**
+ * StatCard Component - Displays a single statistic
+ */
+const StatCard = ({ value, label }) => (
+  <div 
+    style={doctorDashboardStyles.statCard}
+    onMouseOver={handleCardHoverOver}
+    onMouseOut={handleCardHoverOut}
+  >
+    <div style={doctorDashboardStyles.statNumber}>{value}</div>
+    <div style={doctorDashboardStyles.statLabel}>{label}</div>
+  </div>
+);
+
+/**
+ * AppointmentItem Component - Displays a single appointment with details
+ */
+const AppointmentItem = ({
+  appointment,
+  isExpanded,
+  onToggleExpand,
+  onStatusUpdate,
+  onReschedule,
+  getStatusStyle
+}) => {
+  const appt = appointment;
+  
+  return (
+    <div 
+      style={doctorDashboardStyles.appointmentListItem}
+      onMouseOver={handleCardHoverOver}
+      onMouseOut={handleCardHoverOut}
+    >
+      {/* Header - Always Visible */}
+      <div 
+        style={doctorDashboardStyles.appointmentHeader}
+        onClick={onToggleExpand}
+      >
+        <div style={doctorDashboardStyles.appointmentMainInfo}>
+          <div style={doctorDashboardStyles.appointmentDateBadge}>
+            <div style={doctorDashboardStyles.dateDay}>
+              {new Date(appt.time).getDate()}
+            </div>
+            <div style={doctorDashboardStyles.dateMonth}>
+              {new Date(appt.time).toLocaleDateString('en-US', { month: 'short' })}
+            </div>
+          </div>
+          
+          <div style={doctorDashboardStyles.appointmentSummary}>
+            <div style={doctorDashboardStyles.patientName}>{appt.patient.name}</div>
+            <div style={doctorDashboardStyles.appointmentTime}>
+              {new Date(appt.time).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })}
+            </div>
+            <div style={doctorDashboardStyles.appointmentYear}>
+              {new Date(appt.time).getFullYear()}
+            </div>
           </div>
         </div>
+        
+        <div style={doctorDashboardStyles.appointmentActions}>
+          <span 
+            style={{
+              ...doctorDashboardStyles.statusBadge,
+              ...getStatusStyle(appt.status)
+            }}
+          >
+            {appt.status}
+          </span>
+          
+          <div style={doctorDashboardStyles.expandButton}>
+            <span style={{
+              ...doctorDashboardStyles.expandIcon,
+              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+            }}>
+              ▼
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Details */}
+      {isExpanded && (
+        <div style={doctorDashboardStyles.appointmentDetails}>
+          <div style={doctorDashboardStyles.detailsGrid}>
+            <div style={doctorDashboardStyles.detailItem}>
+              <div style={doctorDashboardStyles.detailLabel}>Patient Information</div>
+              <div style={doctorDashboardStyles.detailValue}>
+                <div style={doctorDashboardStyles.patientInfo}>
+                  <div style={doctorDashboardStyles.patientFullName}>{appt.patient.name}</div>
+                  <div style={doctorDashboardStyles.patientEmail}>{appt.patient.email}</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={doctorDashboardStyles.detailItem}>
+              <div style={doctorDashboardStyles.detailLabel}>Full Date & Time</div>
+              <div style={doctorDashboardStyles.detailValue}>
+                {new Date(appt.time).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
+            </div>
+
+            {appt.reason && (
+              <div style={doctorDashboardStyles.detailItem}>
+                <div style={doctorDashboardStyles.detailLabel}>Reason for Visit</div>
+                <div style={doctorDashboardStyles.detailValue}>{appt.reason}</div>
+              </div>
+            )}
+
+            <div style={doctorDashboardStyles.detailItem}>
+              <div style={doctorDashboardStyles.detailLabel}>Appointment ID</div>
+              <div style={doctorDashboardStyles.detailValue}>
+                <code style={doctorDashboardStyles.appointmentId}>
+                  {appt._id.slice(-8).toUpperCase()}
+                </code>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div style={doctorDashboardStyles.actionButtonsSection}>
+            <div style={doctorDashboardStyles.actionButtonsTitle}>Quick Actions</div>
+            <div style={doctorDashboardStyles.buttonGroup}>
+              {appt.status === 'pending' && (
+                <>
+                  <button
+                    onClick={() => onStatusUpdate(appt._id, 'confirmed')}
+                    style={doctorDashboardStyles.acceptButton}
+                    onMouseOver={(e) => { e.target.style.background = '#047857'; }}
+                    onMouseOut={(e) => { e.target.style.background = '#059669'; }}
+                  >
+                    Accept
+                  </button>
+                  
+                  <button
+                    onClick={onReschedule}
+                    style={doctorDashboardStyles.rescheduleButton}
+                    onMouseOver={(e) => { e.target.style.background = '#B45309'; }}
+                    onMouseOut={(e) => { e.target.style.background = '#D97706'; }}
+                  >
+                    Reschedule
+                  </button>
+                  
+                  <button
+                    onClick={() => onStatusUpdate(appt._id, 'cancelled')}
+                    style={doctorDashboardStyles.rejectButton}
+                    onMouseOver={(e) => { e.target.style.background = '#FEF2F2'; }}
+                    onMouseOut={(e) => { e.target.style.background = '#FFFFFF'; }}
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
+              
+              {appt.status === 'confirmed' && (
+                <button
+                  onClick={() => onStatusUpdate(appt._id, 'completed')}
+                  style={doctorDashboardStyles.completeButton}
+                  onMouseOver={(e) => { e.target.style.background = '#1D4ED8'; }}
+                  onMouseOut={(e) => { e.target.style.background = '#2563EB'; }}
+                >
+                  Mark Complete
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Notifications */}
+          {appt.notifications && appt.notifications.length > 0 && (
+            <div style={doctorDashboardStyles.notificationSection}>
+              <div style={doctorDashboardStyles.notificationTitle}>Notifications</div>
+              <div style={doctorDashboardStyles.notificationList}>
+                {appt.notifications.map((notification, idx) => (
+                  <div key={idx} style={doctorDashboardStyles.notificationItem}>
+                    <div style={doctorDashboardStyles.notificationContent}>
+                      {notification.message}
+                    </div>
+                    <div style={doctorDashboardStyles.notificationMeta}>
+                      {notification.seen ? (
+                        <span style={doctorDashboardStyles.notificationSeen}>✓ Seen</span>
+                      ) : (
+                        <span style={doctorDashboardStyles.notificationNew}>● New</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
+    </div>
+  );
+};
+
+/**
+ * RescheduleModal Component - Modal for rescheduling appointments
+ */
+const RescheduleModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  rescheduleData,
+  onInputChange,
+  isSubmitting
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div style={doctorDashboardStyles.modalOverlay} onClick={onClose}>
+      <div 
+        style={doctorDashboardStyles.modalContent} 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={doctorDashboardStyles.modalTitle}>Reschedule Appointment</h2>
+        
+        <form onSubmit={onSubmit}>
+          <input
+            type="datetime-local"
+            name="newTime"
+            value={rescheduleData.newTime}
+            onChange={onInputChange}
+            style={doctorDashboardStyles.formInput}
+            min={new Date().toISOString().slice(0, 16)}
+            required
+          />
+
+          <div style={doctorDashboardStyles.modalButtonGroup}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={doctorDashboardStyles.cancelButton}
+              onMouseOver={(e) => { e.target.style.background = '#F1F5F9'; }}
+              onMouseOut={(e) => { e.target.style.background = '#FFFFFF'; }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                ...doctorDashboardStyles.submitButton,
+                opacity: isSubmitting ? 0.7 : 1,
+                cursor: isSubmitting ? 'not-allowed' : 'pointer'
+              }}
+              onMouseOver={(e) => {
+                if (!isSubmitting) e.target.style.background = '#1D4ED8';
+              }}
+              onMouseOut={(e) => {
+                if (!isSubmitting) e.target.style.background = '#2563EB';
+              }}
+            >
+              {isSubmitting ? 'Rescheduling...' : 'Confirm Reschedule'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for a modern look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; 
+}
+
+/* Smooth transitions */
+a, button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Input Focus States */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="datetime-local"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #1E40AF !important;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1), 0 0 0 1px rgba(30, 64, 175, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Select specific styling */
+select {
+  padding-right: 40px !important;
+}
+
+select:hover:not(:disabled) {
+  border-color: #1E40AF !important;
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.2) !important;
+  background-image: linear-gradient(135deg, #FFFFFF 0%, #DBEAFE 100%), 
+                    url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E40AF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-position: center, right 14px center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover, 18px !important;
+}
+
+select:focus {
+  border-color: #1E40AF !important;
+  box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.12), 0 6px 20px rgba(30, 64, 175, 0.2) !important;
+}
+
+/* Select option styling */
+select option {
+  padding: 14px 16px;
+  background: #FFFFFF;
+  color: #1A2F4D;
+  font-weight: 500;
+  font-size: 15px;
+  font-family: "'Inter', 'Segoe UI', sans-serif";
+  line-height: 1.8;
+  border: none;
+  margin: 6px 0;
+  letter-spacing: 0.3px;
+}
+
+select option:first-child {
+  color: #94A3B8;
+  font-weight: 500;
+  background: #F8FAFC;
+}
+
+select option:hover {
+  background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+select option:checked {
+  background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+  background-image: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(30, 64, 175, 0.4);
+}
+
+/* Button Hover Effects */
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Remove select dropdown default arrow styling for Firefox */
+select {
+  background-clip: padding-box;
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+  color: #94A3B8;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Disabled button state */
+button:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+}
+
+/* Selection highlight for form elements */
+input::-moz-selection,
+textarea::-moz-selection {
+  background: rgba(30, 64, 175, 0.15);
+  color: #1A2F4D;
+}
+
+input::selection,
+textarea::selection {
+  background: rgba(30, 64, 175, 0.15);
+  color: #1A2F4D;
+}

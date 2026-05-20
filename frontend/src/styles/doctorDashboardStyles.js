@@ -1,559 +1,595 @@
+// ─── US-CLINIC Doctor Dashboard Styles ────────────────────────────────────────
+// Tuned for light DashboardLayout background (#F5F7FA)
+
 const doctorDashboardStyles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg,rgb(116, 201, 234) 0%,rgb(117, 203, 215) 50%, #E0F6FF 100%)',
+    background: '#F5F7FA',
     fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     padding: '0',
     margin: '0',
+    color: '#0F172A',
   },
-  
-  header: {
-    background: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-    padding: '20px 40px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-  },
-  
+
   welcomeText: {
-    color: '#1e3a8a',
-    fontSize: '28px',
+    color: '#0B1D3A',
+    fontSize: '24px',
     fontWeight: '600',
     margin: '0',
-    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    letterSpacing: '-0.5px',
   },
-  
+
   logoutButton: {
-    background: 'linear-gradient(45deg, #ff6b6b, #ee5a52)',
-    color: 'white',
+    background: '#DC2626',
+    color: '#FFFFFF',
     border: 'none',
-    borderRadius: '25px',
+    borderRadius: '8px',
     padding: '12px 24px',
     fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 15px rgba(238, 90, 82, 0.4)',
+    transition: 'all 0.2s ease',
   },
-  
+
   mainContent: {
     padding: '40px',
     maxWidth: '1200px',
     margin: '0 auto',
   },
-  
+
   sectionTitle: {
-    color: '#1e3a8a',
-    fontSize: '24px',
-    fontWeight: '600',
-    marginBottom: '30px',
-    textAlign: 'center',
-    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    color: '#0B1D3A',
+    fontSize: '22px',
+    fontWeight: '700',
+    marginBottom: '20px',
+    textAlign: 'left',
+    letterSpacing: '-0.3px',
   },
-  
+
   statsContainer: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '20px',
-    marginBottom: '40px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '16px',
+    marginBottom: '32px',
   },
-  
+
   statCard: {
-    background: 'rgba(255, 255, 255, 0.15)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '15px',
-    padding: '20px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center',
-    transition: 'all 0.3s ease',
+    background: '#FFFFFF',
+    borderRadius: '12px',
+    padding: '20px 24px',
+    border: '1px solid #E2E8F0',
+    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06)',
+    textAlign: 'left',
+    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
   },
-  
+
   statNumber: {
     fontSize: '32px',
     fontWeight: '700',
-    color: '#1e3a8a',
-    marginBottom: '8px',
+    color: '#0B1D3A',
+    marginBottom: '4px',
+    lineHeight: 1.2,
   },
-  
+
   statLabel: {
-    fontSize: '14px',
-    color: '#374151',
+    fontSize: '13px',
+    color: '#64748B',
     fontWeight: '500',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.02em',
   },
-  
+
   appointmentsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-    gap: '25px',
-    marginTop: '20px',
+    gap: '20px',
+    marginTop: '16px',
   },
-  
+
   appointmentCard: {
-    background: 'rgba(255, 255, 255, 0.15)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '20px',
-    padding: '25px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-    transition: 'all 0.3s ease',
-    color: '#1f2937',
+    background: '#FFFFFF',
+    borderRadius: '12px',
+    padding: '24px',
+    border: '1px solid #E2E8F0',
+    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06)',
+    transition: 'box-shadow 0.2s ease',
+    color: '#0F172A',
   },
-  
+
   appointmentInfo: {
-    marginBottom: '15px',
+    marginBottom: '12px',
   },
-  
+
   appointmentLabel: {
     fontWeight: '600',
-    fontSize: '14px',
-    color: '#374151',
+    fontSize: '12px',
+    color: '#64748B',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.06em',
   },
-  
+
   appointmentValue: {
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '500',
-    marginTop: '5px',
-    color: '#1f2937',
+    marginTop: '4px',
+    color: '#0F172A',
   },
-  
+
   statusBadge: {
     display: 'inline-block',
-    padding: '6px 12px',
-    borderRadius: '15px',
-    fontSize: '12px',
+    padding: '5px 12px',
+    borderRadius: '999px',
+    fontSize: '11px',
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.05em',
   },
-  
+
   statusConfirmed: {
-    background: 'linear-gradient(45deg, #4CAF50, #45a049)',
-    color: 'white',
+    background: '#ECFDF5',
+    color: '#047857',
+    border: '1px solid #A7F3D0',
   },
-  
+
   statusPending: {
-    background: 'linear-gradient(45deg, #ff9800, #f57c00)',
-    color: 'white',
+    background: '#FFFBEB',
+    color: '#B45309',
+    border: '1px solid #FDE68A',
   },
-  
+
   statusCompleted: {
-    background: 'linear-gradient(45deg, #2196F3, #1976D2)',
-    color: 'white',
+    background: '#EFF6FF',
+    color: '#1D4ED8',
+    border: '1px solid #BFDBFE',
   },
-  
+
   statusCancelled: {
-    background: 'linear-gradient(45deg, #f44336, #d32f2f)',
-    color: 'white',
+    background: '#FEF2F2',
+    color: '#B91C1C',
+    border: '1px solid #FECACA',
   },
-  
+
   buttonGroup: {
     display: 'flex',
-    gap: '12px',
-    marginTop: '20px',
+    gap: '10px',
+    marginTop: '4px',
     flexWrap: 'wrap',
   },
-  
+
   actionButton: {
-    padding: '8px 16px',
-    borderRadius: '20px',
+    padding: '10px 18px',
+    borderRadius: '8px',
     border: 'none',
     fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
-  
+
   acceptButton: {
-    background: 'linear-gradient(45deg, #10b981, #059669)',
-    color: 'white',
-    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    border: 'none',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    background: '#059669',
+    color: '#FFFFFF',
+    boxShadow: '0 1px 2px rgba(5, 150, 105, 0.2)',
+    transition: 'background-color 0.15s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
-  
+
   rescheduleButton: {
-    background: 'linear-gradient(45deg, #f59e0b, #d97706)',
-    color: 'white',
-    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    border: 'none',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    background: '#D97706',
+    color: '#FFFFFF',
+    boxShadow: '0 1px 2px rgba(217, 119, 6, 0.2)',
+    transition: 'background-color 0.15s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
-  
+
   rejectButton: {
-    background: 'linear-gradient(45deg, #ef4444, #dc2626)',
-    color: 'white',
-    boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    background: '#FFFFFF',
+    color: '#DC2626',
+    border: '1px solid #FECACA',
+    boxShadow: 'none',
+    transition: 'background-color 0.15s ease, border-color 0.15s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
-  
+
   completeButton: {
-    background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
-    color: 'white',
-    boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    border: 'none',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    background: '#2563EB',
+    color: '#FFFFFF',
+    boxShadow: '0 1px 2px rgba(37, 99, 235, 0.2)',
+    transition: 'background-color 0.15s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
-  
+
   emptyState: {
     textAlign: 'center',
-    padding: '60px 20px',
-    color: '#374151',
+    padding: '80px 40px',
+    background: '#FFFFFF',
+    borderRadius: '16px',
+    border: '2px dashed #E0E7FF',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
   },
-  
+
   emptyStateIcon: {
-    fontSize: '64px',
-    marginBottom: '20px',
-    opacity: '0.6',
+    fontSize: '100px',
+    marginBottom: '24px',
+    opacity: '1',
   },
-  
+
   emptyStateText: {
-    fontSize: '18px',
-    fontWeight: '500',
-    marginBottom: '10px',
+    fontSize: '26px',
+    fontWeight: '800',
+    marginBottom: '16px',
+    color: '#0B1D3A',
+    letterSpacing: '-0.5px',
   },
-  
+
   emptyStateSubtext: {
-    fontSize: '14px',
-    opacity: '0.7',
+    fontSize: '18px',
+    color: '#2A7DE1',
+    fontWeight: '600',
   },
-  
+
   notificationContainer: {
-    marginTop: '15px',
-    padding: '15px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '10px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    marginTop: '12px',
+    padding: '12px 16px',
+    background: '#F8FAFC',
+    borderRadius: '8px',
+    border: '1px solid #E2E8F0',
   },
-  
+
   notification: {
     display: 'flex',
     alignItems: 'center',
-    padding: '8px 0',
+    padding: '6px 0',
     fontSize: '14px',
-    color: '#374151',
+    color: '#334155',
   },
-  
+
   notificationIcon: {
     marginRight: '8px',
     fontSize: '16px',
   },
-  
+
   notificationNew: {
-    background: 'linear-gradient(45deg, #2196F3, #1976D2)',
-    color: 'white',
-    padding: '4px 8px',
-    borderRadius: '12px',
+    background: '#EFF6FF',
+    color: '#1D4ED8',
+    padding: '3px 10px',
+    borderRadius: '999px',
     fontSize: '11px',
     fontWeight: '600',
-    marginLeft: '8px',
+    border: '1px solid #BFDBFE',
   },
-  
+
   notificationSeen: {
-    color: '#6b7280',
+    color: '#94A3B8',
     fontSize: '11px',
-    marginLeft: '8px',
+    fontWeight: '500',
   },
-  
+
   divider: {
-    margin: '20px 0',
+    margin: '16px 0',
     height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.3), transparent)',
+    background: '#E2E8F0',
     border: 'none',
   },
-  
-  // Modal styles for reschedule functionality
+
   modalOverlay: {
     position: 'fixed',
     top: '0',
     left: '0',
     width: '100%',
     height: '100%',
-    background: 'rgba(0, 0, 0, 0.5)',
+    background: 'rgba(15, 23, 42, 0.45)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: '1000',
   },
-  
+
   modalContent: {
-    background: 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '20px',
-    padding: '40px',
-    maxWidth: '400px',
+    background: '#FFFFFF',
+    borderRadius: '12px',
+    padding: '32px',
+    maxWidth: '420px',
     width: '90%',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
+    boxShadow: '0 20px 40px rgba(15, 23, 42, 0.15)',
+    border: '1px solid #E2E8F0',
+    color: '#0F172A',
   },
-  
+
   modalTitle: {
-    color: '#1e3a8a',
+    color: '#0B1D3A',
     fontSize: '20px',
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: '20px',
-    textAlign: 'center',
+    textAlign: 'left',
   },
-  
+
   formInput: {
     width: '100%',
-    padding: '12px 16px',
-    border: '2px solid rgba(30, 58, 138, 0.2)',
-    borderRadius: '10px',
-    fontSize: '16px',
-    color: '#1f2937',
-    background: 'rgba(255, 255, 255, 0.8)',
-    transition: 'all 0.3s ease',
+    padding: '12px 14px',
+    border: '1px solid #CBD5E1',
+    borderRadius: '8px',
+    fontSize: '15px',
+    color: '#0F172A',
+    background: '#FFFFFF',
+    transition: 'border-color 0.15s ease',
     boxSizing: 'border-box',
     marginBottom: '20px',
+    outline: 'none',
   },
-  
+
   modalButtonGroup: {
     display: 'flex',
-    gap: '15px',
+    gap: '12px',
   },
-  
+
   submitButton: {
     flex: '1',
-    background: 'linear-gradient(45deg, #10b981, #059669)',
-    color: 'white',
+    background: '#2563EB',
+    color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
-    padding: '12px 24px',
-    fontSize: '16px',
+    borderRadius: '8px',
+    padding: '12px 20px',
+    fontSize: '15px',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    transition: 'background-color 0.15s ease',
   },
-  
+
   cancelButton: {
     flex: '1',
-    background: 'rgba(107, 114, 128, 0.1)',
-    color: '#374151',
-    border: '2px solid rgba(107, 114, 128, 0.3)',
-    borderRadius: '10px',
-    padding: '12px 24px',
-    fontSize: '16px',
+    background: '#FFFFFF',
+    color: '#475569',
+    border: '1px solid #CBD5E1',
+    borderRadius: '8px',
+    padding: '12px 20px',
+    fontSize: '15px',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    transition: 'background-color 0.15s ease',
   },
-  
-  // New appointment list styles (similar to patient dashboard)
+
   appointmentsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '15px',
-    marginTop: '20px',
+    gap: '12px',
+    marginTop: '8px',
   },
 
   appointmentListItem: {
-    background: 'rgba(255, 255, 255, 0.15)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '15px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-    transition: 'all 0.3s ease',
+    background: '#FFFFFF',
+    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06)',
+    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
     overflow: 'hidden',
-    cursor: 'pointer',
   },
 
   appointmentHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px 25px',
-    '&:hover': {
-      background: 'rgba(255, 255, 255, 0.05)',
-    }
+    padding: '18px 22px',
+    cursor: 'pointer',
+    gap: '16px',
   },
 
   appointmentMainInfo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px',
+    gap: '18px',
+    minWidth: 0,
+    flex: 1,
   },
 
   appointmentDateBadge: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
-    borderRadius: '12px',
-    padding: '12px 16px',
-    color: 'white',
-    minWidth: '70px',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+    justifyContent: 'center',
+    background: '#0B1D3A',
+    borderRadius: '10px',
+    padding: '10px 14px',
+    color: '#FFFFFF',
+    minWidth: '64px',
+    flexShrink: 0,
   },
 
   dateDay: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '700',
     lineHeight: '1',
   },
 
   dateMonth: {
-    fontSize: '12px',
-    fontWeight: '500',
+    fontSize: '11px',
+    fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginTop: '2px',
+    letterSpacing: '0.06em',
+    marginTop: '3px',
+    opacity: 0.9,
   },
 
   appointmentSummary: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '2px',
+    minWidth: 0,
   },
 
   patientName: {
-    fontSize: '18px',
+    fontSize: '17px',
     fontWeight: '600',
-    color: '#1e3a8a',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
+    color: '#0B1D3A',
+    lineHeight: 1.3,
   },
 
   appointmentTime: {
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '500',
-    color: '#374151',
+    color: '#334155',
   },
 
   appointmentYear: {
-    fontSize: '14px',
-    color: '#6b7280',
+    fontSize: '13px',
+    color: '#64748B',
   },
 
   appointmentActions: {
     display: 'flex',
     alignItems: 'center',
-    gap: '15px',
+    gap: '12px',
+    flexShrink: 0,
   },
 
   expandButton: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '35px',
-    height: '35px',
-    borderRadius: '50%',
-    background: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(5px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    transition: 'all 0.3s ease',
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    background: '#F1F5F9',
+    border: '1px solid #E2E8F0',
+    transition: 'background-color 0.15s ease',
   },
 
   expandIcon: {
-    fontSize: '12px',
-    color: '#374151',
-    transition: 'transform 0.3s ease',
+    fontSize: '10px',
+    color: '#64748B',
+    transition: 'transform 0.2s ease',
   },
 
   appointmentDetails: {
-    padding: '0 25px 25px 25px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-    background: 'rgba(255, 255, 255, 0.05)',
-    animation: 'slideDown 0.3s ease-out',
+    padding: '0 22px 22px 22px',
+    borderTop: '1px solid #F1F5F9',
+    background: '#FAFBFC',
   },
 
   detailsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '20px',
-    marginTop: '20px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '14px',
+    marginTop: '18px',
   },
 
   detailItem: {
-    background: 'rgba(255, 255, 255, 0.1)',
+    background: '#FFFFFF',
     borderRadius: '10px',
-    padding: '15px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    padding: '14px 16px',
+    border: '1px solid #E2E8F0',
   },
 
   detailLabel: {
-    fontSize: '14px',
+    fontSize: '11px',
     fontWeight: '600',
-    color: '#374151',
+    color: '#64748B',
     marginBottom: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
   },
 
   detailValue: {
-    fontSize: '16px',
-    color: '#1f2937',
+    fontSize: '15px',
+    color: '#0F172A',
     lineHeight: '1.5',
+    fontWeight: '500',
   },
 
   patientInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px',
+    gap: '4px',
   },
 
   patientFullName: {
-    fontSize: '18px',
+    fontSize: '16px',
     fontWeight: '600',
-    color: '#1e3a8a',
+    color: '#0B1D3A',
   },
 
   patientEmail: {
     fontSize: '14px',
-    color: '#6b7280',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
+    color: '#475569',
+    wordBreak: 'break-word',
   },
 
   appointmentId: {
-    background: 'rgba(59, 130, 246, 0.1)',
-    color: '#2563eb',
-    padding: '4px 8px',
+    background: '#F1F5F9',
+    color: '#334155',
+    padding: '4px 10px',
     borderRadius: '6px',
-    fontSize: '14px',
-    fontFamily: 'monospace',
+    fontSize: '13px',
+    fontFamily: "'SF Mono', 'Consolas', monospace",
     fontWeight: '600',
+    border: '1px solid #E2E8F0',
   },
 
   actionButtonsSection: {
-    marginTop: '20px',
-    padding: '15px',
-    background: 'rgba(16, 185, 129, 0.05)',
+    marginTop: '18px',
+    padding: '16px',
+    background: '#FFFFFF',
     borderRadius: '10px',
-    border: '1px solid rgba(16, 185, 129, 0.1)',
+    border: '1px solid #E2E8F0',
   },
 
   actionButtonsTitle: {
-    fontSize: '16px',
+    fontSize: '13px',
     fontWeight: '600',
-    color: '#1e3a8a',
+    color: '#64748B',
     marginBottom: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
   },
 
   notificationSection: {
-    marginTop: '20px',
-    padding: '15px',
-    background: 'rgba(59, 130, 246, 0.05)',
+    marginTop: '14px',
+    padding: '16px',
+    background: '#FFFFFF',
     borderRadius: '10px',
-    border: '1px solid rgba(59, 130, 246, 0.1)',
+    border: '1px solid #E2E8F0',
   },
 
   notificationTitle: {
-    fontSize: '16px',
+    fontSize: '13px',
     fontWeight: '600',
-    color: '#1e3a8a',
-    marginBottom: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
+    color: '#64748B',
+    marginBottom: '10px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
   },
 
   notificationList: {
@@ -566,63 +602,24 @@ const doctorDashboardStyles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px 12px',
-    background: 'rgba(255, 255, 255, 0.5)',
+    gap: '12px',
+    padding: '12px 14px',
+    background: '#F8FAFC',
     borderRadius: '8px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    border: '1px solid #E2E8F0',
   },
 
   notificationContent: {
     fontSize: '14px',
-    color: '#374151',
+    color: '#334155',
     flex: 1,
+    lineHeight: 1.4,
   },
+
   notificationMeta: {
     fontSize: '12px',
-    marginLeft: '10px',
+    flexShrink: 0,
   },
-
-  // Responsive styles for mobile
-  '@media (max-width: 768px)': {
-    appointmentMainInfo: {
-      gap: '15px',
-    },
-    
-    appointmentDateBadge: {
-      minWidth: '60px',
-      padding: '10px 12px',
-    },
-    
-    dateDay: {
-      fontSize: '20px',
-    },
-    
-    patientName: {
-      fontSize: '16px',
-    },
-    
-    appointmentTime: {
-      fontSize: '14px',
-    },
-    
-    detailsGrid: {
-      gridTemplateColumns: '1fr',
-      gap: '15px',
-    },
-    
-    appointmentHeader: {
-      padding: '15px 20px',
-    },
-    
-    appointmentDetails: {
-      padding: '0 20px 20px 20px',
-    },
-
-    buttonGroup: {
-      flexDirection: 'column',
-      gap: '10px',
-    }
-  }
 };
 
 export default doctorDashboardStyles;

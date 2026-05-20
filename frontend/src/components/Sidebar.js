@@ -11,26 +11,31 @@ const Sidebar = () => {
     position: 'fixed',
     top: 0,
     left: 0,
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#122952',
     padding: '20px',
-    color: '#ecf0f1',
+    color: '#FFFFFF',
     display: 'flex',
     flexDirection: 'column',
-    fontFamily: 'Arial, sans-serif'
+    fontFamily: "'Inter', 'Segoe UI', sans-serif",
+    borderRight: '1px solid rgba(42, 125, 225, 0.2)',
   };
 
   const itemStyle = {
     margin: '10px 0',
     cursor: 'pointer',
-    padding: '10px',
-    borderRadius: '6px',
-    backgroundColor: '#34495e',
-    textAlign: 'center'
+    padding: '10px 12px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(42, 125, 225, 0.1)',
+    textAlign: 'center',
+    color: '#FFFFFF',
+    transition: 'all 0.3s ease',
+    border: '1px solid rgba(42, 125, 225, 0.2)',
+    fontWeight: '500',
   };
 
   return (
     <div style={sidebarStyle}>
-      <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Admin Panel</h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#2A7DE1', fontSize: '18px', fontWeight: '800', letterSpacing: '-0.5px' }}>Admin Panel</h2>
       <div style={itemStyle} onClick={() => navigate('/admin')}>Dashboard</div>
       <div style={itemStyle} onClick={() => navigate('/admin/doctors')}>Doctors</div>
       <div style={itemStyle} onClick={() => navigate('/admin/appointments')}>Appointments</div>
